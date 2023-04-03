@@ -624,7 +624,7 @@ uint32_t USBDeviceClass::send(uint32_t ep, const void *data, uint32_t len)
 	// Flash area
 	while (len != 0)
 	{
-		if (usbd.epBank1IsReady(ep)) {
+		if (usbd.epBank1IsReady(ep) && !usbd.epBank1IsTransferComplete(ep)) {
 			// previous transfer is still not complete
 
 			// convert the timeout from microseconds to a number of times through
@@ -633,7 +633,7 @@ uint32_t USBDeviceClass::send(uint32_t ep, const void *data, uint32_t len)
 
 			// Wait for (previous) transfer to complete
 			// inspired by Paul Stoffregen's work on Teensy
-			while (!usbd.epBank1IsTransferComplete(ep)) {
+			while (usbd.epBank1IsReady(ep) && !usbd.epBank1IsTransferComplete(ep)) {
 				if (LastTransmitTimedOut[ep] || timeout-- == 0) {
 					LastTransmitTimedOut[ep] = 1;
 
