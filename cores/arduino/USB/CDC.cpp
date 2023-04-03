@@ -196,12 +196,12 @@ void Serial_::enableInterrupt() {
 	usbd.epBank0EnableTransferComplete(CDC_ENDPOINT_OUT);
 }
 
-void Serial_::begin(unsigned long /* baudrate */)
+void Serial_::begin(uint32_t /* baud_count */)
 {
 	// uart config is ignored in USB-CDC
 }
 
-void Serial_::begin(unsigned long /* baudrate */, uint16_t /* config */)
+void Serial_::begin(uint32_t /* baud_count */, uint16_t /* config */)
 {
 	// uart config is ignored in USB-CDC
 }
@@ -220,9 +220,13 @@ int Serial_::available(void)
 
 int Serial_::availableForWrite(void)
 {
-	// return the number of bytes left in the current bank,
+	// if the bank is ready, return the number of bytes left in the current bank,
 	// always EP size - 1, because bank is flushed on every write
-	return (EPX_SIZE - 1);
+	if (usbd.epBank1IsReady(CDC_ENDPOINT_IN) && !usbd.epBank1IsTransferComplete(CDC_ENDPOINT_IN)) {
+		return 0;
+	} else {
+		return (EPX_SIZE - 1);
+	}
 }
 
 int Serial_::peek(void)
